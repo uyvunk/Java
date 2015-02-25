@@ -1,0 +1,33 @@
+import java.io.*;
+import java.nio.file.Path;
+public class downloader {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String appUrl = "";
+		String appName = "app1";
+		String path = "Z:\\sampleScreenShots\\"+appName;
+		
+		File file = new File(path);
+		if (!file.exists()) {
+			if (file.mkdir()) {
+				System.out.println("Directory "+appName+" is created!");
+			} else {
+				System.out.println("Failed to create directory!");
+			}
+		}
+	 
+//		File files = new File("C:\\Directory2\\Sub2\\Sub-Sub2");
+//		if (files.exists()) {
+//			if (files.mkdirs()) {
+//				System.out.println("Multiple directories are created!");
+//			} else {
+//				System.out.println("Failed to create multiple directories!");
+//			}
+//		}
+
+	}
+
+}
+//File directory = new File("Z:\\sampleScreenShots\\"+appName).mkdir();
+//FileUtils.copyURLToFile(appUrl, "")
