@@ -18,7 +18,7 @@ public class Query {
 	private String jSQLUrl;
 	private String jSQLUser;
 	private String jSQLPassword;
-
+	private String jSQLCustomerDB;
 	// DB Connection
 	private Connection conn;
         private Connection customerConn;
@@ -36,6 +36,10 @@ public class Query {
 					 + "WHERE x.mid = ? and x.did = y.id";
 	private PreparedStatement directorMidStatement;
 
+	private static final String ACTOR_MID_SQL = "SELECT DISTINCT a.* "
+			 + "FROM casts c, actor a "
+			 + "WHERE c.mid = ? and c.pid = a.id";
+	private PreparedStatement actorMidStatement;
 	/* uncomment, and edit, after your create your own customer database */
 	
 	private static final String CUSTOMER_LOGIN_SQL = 
@@ -51,6 +55,9 @@ public class Query {
 
 	private static final String ROLLBACK_SQL = "ROLLBACK TRANSACTION";
 	private PreparedStatement rollbackTransactionStatement;
+	
+	private static final String MID_RENTAL_STATUS_SQL ="SELECT * FROM Rental WHERE movie_id = ? and status=\'open\'";
+	private PreparedStatement rentalStatusStatement;
 	
 	
 
@@ -71,7 +78,7 @@ public class Query {
 		jSQLUrl	   = configProps.getProperty("videostore.imdb_url");
 		jSQLUser	   = configProps.getProperty("videostore.sqlazure_username");
 		jSQLPassword = configProps.getProperty("videostore.sqlazure_password");
-
+		jSQLCustomerDB = configProps.getProperty("videostore.customer_url");
 
 		/* load jdbc drivers */
 		Class.forName(jSQLDriver).newInstance();
@@ -89,12 +96,12 @@ public class Query {
 		   conn.setTransactionIsolation(...) */
 
 		/* Also you will put code here to specify the connection to your
-		   customer DB.  E.g.
+		   customer DB.  E.g. */
 
-		   customerConn = DriverManager.getConnection(...);
+		   customerConn = DriverManager.getConnection(jSQLCustomerDB, jSQLUser, jSQLPassword);
 		   customerConn.setAutoCommit(true); //by default automatically commit after each statement
-		   customerConn.setTransactionIsolation(...); //
-		*/
+		   //customerConn.setTransactionIsolation(...); //
+		
 	        
 	}
 
@@ -111,17 +118,18 @@ public class Query {
 	public void prepareStatements() throws Exception {
 
 		directorMidStatement = conn.prepareStatement(DIRECTOR_MID_SQL);
-
+		
 		/* uncomment after you create your customers database */
-		/*
+		
 		customerLoginStatement = customerConn.prepareStatement(CUSTOMER_LOGIN_SQL);
 		beginTransactionStatement = customerConn.prepareStatement(BEGIN_TRANSACTION_SQL);
 		commitTransactionStatement = customerConn.prepareStatement(COMMIT_SQL);
 		rollbackTransactionStatement = customerConn.prepareStatement(ROLLBACK_SQL);
-		*/
+		
 
 		/* add here more prepare statements for all the other queries you need */
-		/* . . . . . . */
+		actorMidStatement = conn.prepareStatement(ACTOR_MID_SQL);
+		rentalStatusStatement = customerConn.prepareStatement(MID_RENTAL_STATUS_SQL);
 	}
 
 
@@ -163,7 +171,7 @@ public class Query {
 		/* authenticates the user, and returns the user id, or -1 if authentication fails */
 
 		/* Uncomment after you create your own customers database */
-		/*
+		
 		int cid;
 
 		customerLoginStatement.clearParameters();
@@ -174,8 +182,8 @@ public class Query {
 		else cid = -1;
 		cid_set.close();
 		return(cid);
-		 */
-		return (55);
+		 
+		//return (55);
 	}
 
 	public void transaction_printPersonalData(int cid) throws Exception {
@@ -195,7 +203,7 @@ public class Query {
 		/* Interpolate the movie title into the SQL string */
 		String searchSql = SEARCH_SQL_BEGIN + movie_title + SEARCH_SQL_END;
 		
-		Statement searchStatement = conn.createStatement();
+		Statement searchStatement = conn.createStatement();		
 		ResultSet movie_set = searchStatement.executeQuery(searchSql);
 		while (movie_set.next()) {
 			int mid = movie_set.getInt(1);
@@ -213,6 +221,33 @@ public class Query {
 			director_set.close();
 			/* now you need to retrieve the actors, in the same manner */
 			/* then you have to find the status: of "AVAILABLE" "YOU HAVE IT", "UNAVAILABLE" */
+			
+			//Find the actor for the current movie
+			actorMidStatement.clearParameters();
+			actorMidStatement.setInt(1, mid);
+			ResultSet actor_set = actorMidStatement.executeQuery();
+			while (actor_set.next()) {
+				System.out.println("\t\tActor: " + actor_set.getString(3)
+						+ " " + actor_set.getString(2));
+			}
+			actor_set.close();
+			
+			//Find the Rental Status for the current movie
+			rentalStatusStatement.clearParameters();
+			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
+			//rentalStatusStatement.setString(2, "open");
+			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
+			if (rentalStatus_set.next()) {
+				int whorentingID = rentalStatus_set.getInt(1);
+				if (whorentingID == cid)
+					System.out.println("\t\tRental Status: Hey, aren't you renting it? ;D");
+				else
+					System.out.println("\t\tRental Status: The movie is NOT available for rental");
+			} else {
+					System.out.println("\t\tRental Status: The movie is available for rental");
+			}
+				
+			
 		}
 		movie_set.close();
 		System.out.println();
