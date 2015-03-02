@@ -210,7 +210,6 @@ public class Query {
     /* login transaction: invoked only once, when the app is started  */
 	public int transaction_login(String name, String password) throws Exception {
 		/* authenticates the user, and returns the user id, or -1 if authentication fails */
-
 		/* Uncomment after you create your own customers database */
 		
 		int cid;
@@ -299,8 +298,17 @@ public class Query {
 		String choosePlan_HEAD = "UPDATE Customer SET plan_id = ";
 		String choosePlan_BODY = " WHERE id = ";
 		String updateSql = choosePlan_HEAD + pid + choosePlan_BODY + cid ;
+		customerConn.setAutoCommit(false);
 		Statement choosePlanStatement = customerConn.createStatement();
 		int rowAffected = choosePlanStatement.executeUpdate(updateSql);	//update plan_id from customer table
+		if (rowAffected == 1) {
+			customerConn.commit();
+			System.out.println("Plan has been updated");
+		} else {
+			customerConn.rollback();
+			System.out.println("Plan updated UNSUCESSFULLY. Please try again later");
+		}
+		customerConn.setAutoCommit(true);
 	}
 
 	public void transaction_listPlans() throws Exception {
@@ -314,14 +322,14 @@ public class Query {
 		}
 	}
 
-	public void transaction_rent(int cid, int mid) throws Exception {
+	public void transaction_rent(int cid, int mid2) throws Exception {
 	    /* rent the movie mid to the customer cid */
 	    /* remember to enforce consistency ! */
 		
 		/********************* Testing Concurrency Codes**************/
-//		Scanner input = new Scanner(System.in);
-//		System.out.println("Please insert mid:");
-//		int mid = input.nextInt();
+		Scanner input = new Scanner(System.in);
+		System.out.println("Please insert mid:");
+		int mid = input.nextInt();
 		
 		/**********************************************/
 		
