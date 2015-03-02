@@ -18,7 +18,7 @@ public class Query {
 	private String jSQLUrl;
 	private String jSQLUser;
 	private String jSQLPassword;
-
+	private String jSQLCustomerDB;
 	// DB Connection
 	private Connection conn;
         private Connection customerConn;
@@ -35,9 +35,9 @@ public class Query {
 					 + "FROM movie_directors x, directors y "
 					 + "WHERE x.mid = ? and x.did = y.id";
 	private PreparedStatement directorMidStatement;
-
+	
 	/* uncomment, and edit, after your create your own customer database */
-	/*
+	
 	private static final String CUSTOMER_LOGIN_SQL = 
 		"SELECT * FROM customer WHERE login = ? and password = ?";
 	private PreparedStatement customerLoginStatement;
@@ -51,9 +51,24 @@ public class Query {
 
 	private static final String ROLLBACK_SQL = "ROLLBACK TRANSACTION";
 	private PreparedStatement rollbackTransactionStatement;
-	*/
+	
+	private static final String MID_RENTAL_STATUS_SQL ="SELECT * FROM Rental WHERE movie_id = ? and status=\'open\'";
+	private PreparedStatement rentalStatusStatement;
 	
 
+	private static final String ACTOR_MID_SQL = "SELECT DISTINCT a.* "
+			 + "FROM casts c, actor a "
+			 + "WHERE c.mid = ? and c.pid = a.id";
+	private PreparedStatement actorMidStatement;
+	
+	private static final String ACTOR_MNAME_SQL = "SELECT a.id, a.lname,a.fname FROM Actor a, Movie m, Casts c WHERE m.name like '% ? %'"
+													+" AND m.id = c.mid and c.pid = a.id GROUP BY a.id, a.lname, a.fname ORDER BY a.id";
+	private static final String USR_ID_NAME_SQL = "SELECT first_name, last_name FROM Customer WHERE id = ?";
+	private PreparedStatement userNameStatement;
+	
+	private static final String REMAINING_RENTAL_SQL = "SELECT (SELECT p.maximum_number FROM Customer c, Plans p WHERE c.id = ?"
+			+ " AND c.plan_id = p.plan_id)-count(*) FROM Rental r WHERE r.customer_id = ? AND r.status='open'";
+	private PreparedStatement remainingRentalStatement;
 	public Query(String configFilename) {
 		this.configFilename = configFilename;
 	}
@@ -71,7 +86,7 @@ public class Query {
 		jSQLUrl	   = configProps.getProperty("videostore.imdb_url");
 		jSQLUser	   = configProps.getProperty("videostore.sqlazure_username");
 		jSQLPassword = configProps.getProperty("videostore.sqlazure_password");
-
+		jSQLCustomerDB = configProps.getProperty("videostore.customer_url");
 
 		/* load jdbc drivers */
 		Class.forName(jSQLDriver).newInstance();
@@ -89,12 +104,12 @@ public class Query {
 		   conn.setTransactionIsolation(...) */
 
 		/* Also you will put code here to specify the connection to your
-		   customer DB.  E.g.
+		   customer DB.  E.g. */
 
-		   customerConn = DriverManager.getConnection(...);
+		   customerConn = DriverManager.getConnection(jSQLCustomerDB, jSQLUser, jSQLPassword);
 		   customerConn.setAutoCommit(true); //by default automatically commit after each statement
-		   customerConn.setTransactionIsolation(...); //
-		*/
+		   //customerConn.setTransactionIsolation(...); //
+		
 	        
 	}
 
@@ -111,17 +126,20 @@ public class Query {
 	public void prepareStatements() throws Exception {
 
 		directorMidStatement = conn.prepareStatement(DIRECTOR_MID_SQL);
-
+		
 		/* uncomment after you create your customers database */
-		/*
+		
 		customerLoginStatement = customerConn.prepareStatement(CUSTOMER_LOGIN_SQL);
 		beginTransactionStatement = customerConn.prepareStatement(BEGIN_TRANSACTION_SQL);
 		commitTransactionStatement = customerConn.prepareStatement(COMMIT_SQL);
 		rollbackTransactionStatement = customerConn.prepareStatement(ROLLBACK_SQL);
-		*/
+		
 
 		/* add here more prepare statements for all the other queries you need */
-		/* . . . . . . */
+		actorMidStatement = conn.prepareStatement(ACTOR_MID_SQL);
+		rentalStatusStatement = customerConn.prepareStatement(MID_RENTAL_STATUS_SQL);
+		userNameStatement = customerConn.prepareStatement(USR_ID_NAME_SQL);
+		remainingRentalStatement = customerConn.prepareStatement(REMAINING_RENTAL_SQL);
 	}
 
 
@@ -133,12 +151,23 @@ public class Query {
 		/* How many movies can she/he still rent?
 		   You have to compute and return the difference between the customer's plan
 		   and the count of outstanding rentals */
-		return (99);
+		remainingRentalStatement.clearParameters();
+		remainingRentalStatement.setInt(1, cid);
+		remainingRentalStatement.setInt(2, cid);
+		ResultSet remainingRental_set = remainingRentalStatement.executeQuery();
+		if (remainingRental_set.next())
+			return remainingRental_set.getInt(1);	//return the remaining retal of the current customer
+		return (-1);								// return -1 if the ResultSet is empty
 	}
 
 	public String getCustomerName(int cid) throws Exception {
 		/* Find the first and last name of the current customer. */
-		return ("JoeFirstName" + " " + "JoeLastName");
+		userNameStatement.clearParameters();
+		userNameStatement.setInt(1, cid);
+		ResultSet userName_set = userNameStatement.executeQuery();
+		if (userName_set.next())
+			return userName_set.getString(1)+" "+userName_set.getString(2);	// returning fname lname of the current user
+		return null;														// return null if the ResultSet is empty
 
 	}
 
@@ -163,7 +192,7 @@ public class Query {
 		/* authenticates the user, and returns the user id, or -1 if authentication fails */
 
 		/* Uncomment after you create your own customers database */
-		/*
+		
 		int cid;
 
 		customerLoginStatement.clearParameters();
@@ -174,12 +203,14 @@ public class Query {
 		else cid = -1;
 		cid_set.close();
 		return(cid);
-		 */
-		return (55);
+		 
 	}
 
 	public void transaction_printPersonalData(int cid) throws Exception {
 		/* println the customer's personal data: name, and plan number */
+		String fullname = getCustomerName(cid);
+		int remainRental = getRemainingRentals(cid);
+		System.out.println("Hi "+ fullname +".\tYou have "+ remainRental +" remaining rentals. Enjoy Renting!");
 	}
 
 
@@ -195,7 +226,7 @@ public class Query {
 		/* Interpolate the movie title into the SQL string */
 		String searchSql = SEARCH_SQL_BEGIN + movie_title + SEARCH_SQL_END;
 		
-		Statement searchStatement = conn.createStatement();
+		Statement searchStatement = conn.createStatement();		
 		ResultSet movie_set = searchStatement.executeQuery(searchSql);
 		while (movie_set.next()) {
 			int mid = movie_set.getInt(1);
@@ -213,6 +244,33 @@ public class Query {
 			director_set.close();
 			/* now you need to retrieve the actors, in the same manner */
 			/* then you have to find the status: of "AVAILABLE" "YOU HAVE IT", "UNAVAILABLE" */
+			
+			//Find the actor for the current movie
+			actorMidStatement.clearParameters();
+			actorMidStatement.setInt(1, mid);
+			ResultSet actor_set = actorMidStatement.executeQuery();
+			while (actor_set.next()) {
+				System.out.println("\t\tActor: " + actor_set.getString(3)
+						+ " " + actor_set.getString(2));
+			}
+			actor_set.close();
+			
+			//Find the Rental Status for the current movie
+			rentalStatusStatement.clearParameters();
+			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
+			//rentalStatusStatement.setString(2, "open");
+			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
+			if (rentalStatus_set.next()) {
+				int whorentingID = rentalStatus_set.getInt(1);
+				if (whorentingID == cid)
+					System.out.println("\t\tRental Status: YOU HAVE IT");
+				else
+					System.out.println("\t\tRental Status: UNAVAILABLE");
+			} else {
+					System.out.println("\t\tRental Status: AVAILABLE");
+			}
+				
+			
 		}
 		movie_set.close();
 		System.out.println();
@@ -225,6 +283,13 @@ public class Query {
 
 	public void transaction_listPlans() throws Exception {
 	    /* println all available plans: SELECT * FROM plan */
+		String listPlansql = "SELECT * from Plans";
+		Statement listPlanStatement = customerConn.createStatement();
+		ResultSet listPlan_set = listPlanStatement.executeQuery(listPlansql);
+		System.out.println("\tPlan\t\t\tAvailable Rental\tMonthly Fee\n");
+		while (listPlan_set.next()){
+			System.out.println("\t"+ listPlan_set.getString(2) + "\t\t\t" + listPlan_set.getInt(3) + "\t\t\t" + listPlan_set.getInt(4));
+		}
 	}
 
 	public void transaction_rent(int cid, int mid) throws Exception {
@@ -242,8 +307,63 @@ public class Query {
 		   Needs to run three SQL queries: (a) movies, (b) movies join directors, (c) movies join actors
 		   Answers are sorted by mid.
 		   Then merge-joins the three answer sets */
+		
+		//Run a query to join MOVIE, ACTOR, DIRECTORS, CASTS, and MOVIE_DIRECTORS
+		String movieSql = "SELECT DISTINCT id, name, year FROM movie WHERE name LIKE '%"+ movie_title +"%' ORDER BY id";
+		String mov_dirSql = "SELECT DISTINCT m.id, d.lname, d.fname from movie m, directors d, movie_directors md WHERE"
+										+" m.name LIKE '%"+ movie_title +"%' AND m.id = md.mid and md.did = d.id ORDER BY m.id";
+		String mov_actSql = "SELECT DISTINCT m.id, a.lname, a.fname from movie m, actor a, casts c WHERE m.name LIKE '%"+ movie_title 
+								+"%' AND m.id = c.mid and c.pid = a.id ORDER BY m.id";
+		
+//		String joinSQL_Head = "SELECT DISTINCT m.id, m.name, m.year, d.fname, d.lname, a.fname, a.lname "
+//				+ "FROM movie m, actor a, directors d, casts c, movie_directors md " 
+//				+ "WHERE m.name like '%";
+//		String joinSQL_End = "%' and m.id = c.mid and c.pid = a.id" 
+//							+ " and m.id = md.mid and md.did = d.id ORDER BY m.id";
+//		String joinSQL = joinSQL_Head + movie_title + joinSQL_End; 
+		
+		Statement movieStatement = conn.createStatement();		
+		Statement mov_dirStatement = conn.createStatement();
+		Statement mov_actStatement = conn.createStatement();
+		ResultSet mov_set = movieStatement.executeQuery(movieSql);//m.id, m.name, m.year
+		ResultSet mov_dir_set = mov_dirStatement.executeQuery(mov_dirSql); //m.id, d.lname, d.fname
+		ResultSet mov_act_set = mov_actStatement.executeQuery(mov_actSql); //m.id, a.lname, a.fname
+		
+		int cdmid = 0;
+		int camid = 0;
+		while (mov_set.next()) {
+			int cmid = mov_set.getInt(1);	
+			System.out.println("ID: " + cmid + " NAME: "
+					+ mov_set.getString(2) + " YEAR: "
+					+ mov_set.getString(3));
+			
+			if(cdmid < cmid) {
+				while (mov_dir_set.next()) {
+					cdmid = mov_dir_set.getInt(1);
+					if (cdmid == cmid)
+						System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+"  "+ mov_dir_set.getString(3)); //get d.fname and d.lname
+					else
+						break;
+				} 
+			}
+			if(cdmid == cmid)
+				System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+"  "+ mov_dir_set.getString(3)); //get d.fname and d.lname
+			
+			while (mov_act_set.next()) {
+				camid = mov_act_set.getInt(1);
+				if (camid == cmid)
+					System.out.println("\t\tActor: "+ mov_act_set.getString(2)+"  "+ mov_act_set.getString(3)); //get d.fname and d.lname
+				else
+					break;
+			} 
+	
+		}
+		mov_set.close();
+		mov_dir_set.close();
+		mov_act_set.close();
 	}
-
+		
+		
 
     /* Uncomment helpers below once you've got beginTransactionStatement,
        commitTransactionStatement, and rollbackTransactionStatement setup from

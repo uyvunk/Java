@@ -18,10 +18,14 @@ INSERT INTO Customer VALUES (6, 'micro', '444444', 'Thao Nguyen', 'Dang', 2);
 INSERT INTO Customer VALUES (7, 'pico', '555555', 'Erin', 'Yoon', 3);
 INSERT INTO Customer VALUES (8, 'teriyaki', '666666', 'Mehhong', 'Chhay', 4);
 
-INSERT INTO Plans VALUES (1, 'Premium +', 20, 20);
-INSERT INTO Plans VALUES (2, 'Premium', 15, 15);
+INSERT INTO Plans VALUES (1, 'Premium', 20, 20);
+INSERT INTO Plans VALUES (2, 'Value+', 15, 15);
 INSERT INTO Plans VALUES (3, 'Family', 10, 10);
 INSERT INTO Plans VALUES (4, 'Simple', 5, 5);
+INSERT INTO Plans VALUES (5, 'Saving', 4, 4);
+INSERT INTO Plans VALUES (6, 'Econ +', 3, 3);
+INSERT INTO Plans VALUES (7, 'Econ', 2, 1);
+INSERT INTO Plans VALUES (8, 'Student', 10, 7);
 
 INSERT INTO Rental VALUES (1,581605,'open', '022720151100'); --mmddyyyyhhmm
 INSERT INTO Rental VALUES (4,254288,'open', '010120150000'); 
