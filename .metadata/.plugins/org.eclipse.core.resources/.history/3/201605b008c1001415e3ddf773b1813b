@@ -314,10 +314,12 @@ public class Query {
 		}
 	}
 
-	public void transaction_rent(int cid, int mid) throws Exception {
+	public void transaction_rent(int cid, int mid2) throws Exception {
 	    /* rent the movie mid to the customer cid */
 	    /* remember to enforce consistency ! */
+
 		
+		//Check if the give mid is valid
 		/********************* Testing Concurrency Codes**************/
 //		Scanner input = new Scanner(System.in);
 //		System.out.println("Please insert mid:");
@@ -325,7 +327,6 @@ public class Query {
 		
 		/**********************************************/
 		
-		//Check if the give mid is valid
 		boolean valid = isValidMovie(mid);
 		if (valid) {
 			rentalStatusStatement.clearParameters();

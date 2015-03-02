@@ -274,19 +274,19 @@ public class Query {
 			actor_set.close();
 			
 			//Find the Rental Status for the current movie
-			rentalStatusStatement.clearParameters();
-			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
-			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
-			if (rentalStatus_set.next()) {
-				int whorentingID = rentalStatus_set.getInt(1);
-				if (whorentingID == cid)
-					System.out.println("\t\tRental Status: YOU CURRENTLY RENT IT");
-				else
-					System.out.println("\t\tRental Status: UNAVAILABLE");
-			} else {
-					System.out.println("\t\tRental Status: AVAILABLE");
-			}
-				
+//			rentalStatusStatement.clearParameters();
+//			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
+//			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
+//			if (rentalStatus_set.next()) {
+//				int whorentingID = rentalStatus_set.getInt(1);
+//				if (whorentingID == cid)
+//					System.out.println("\t\tRental Status: YOU CURRENTLY RENT IT");
+//				else
+//					System.out.println("\t\tRental Status: UNAVAILABLE");
+//			} else {
+//					System.out.println("\t\tRental Status: AVAILABLE");
+//			}
+//				
 			
 		}
 		movie_set.close();
@@ -314,18 +314,19 @@ public class Query {
 		}
 	}
 
-	public void transaction_rent(int cid, int mid) throws Exception {
+	public void transaction_rent(int cid, int mid2) throws Exception {
 	    /* rent the movie mid to the customer cid */
 	    /* remember to enforce consistency ! */
+
 		
-		/********************* Testing Concurrency Codes**************/
-//		Scanner input = new Scanner(System.in);
-//		System.out.println("Please insert mid:");
-//		int mid = input.nextInt();
+		//Check if the give mid is valid
+		/********************* Testing COdes**************/
+		Scanner input = new Scanner(System.in);
+		System.out.println("Please insert mid:");
+		int mid = input.nextInt();
 		
 		/**********************************************/
 		
-		//Check if the give mid is valid
 		boolean valid = isValidMovie(mid);
 		if (valid) {
 			rentalStatusStatement.clearParameters();

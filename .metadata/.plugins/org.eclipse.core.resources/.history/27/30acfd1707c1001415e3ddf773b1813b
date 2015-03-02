@@ -63,7 +63,7 @@ public class Query {
 
 	private static final String ACTOR_MID_SQL = "SELECT DISTINCT a.* "
 			 + "FROM casts c, actor a "
-			 + "WHERE c.mid = ? and c.pid = a.id ORDER BY a.lname";
+			 + "WHERE c.mid = ? and c.pid = a.id";
 	private PreparedStatement actorMidStatement;
 	
 	private static final String USR_ID_NAME_SQL = "SELECT first_name, last_name FROM Customer WHERE id = ?";
@@ -314,18 +314,19 @@ public class Query {
 		}
 	}
 
-	public void transaction_rent(int cid, int mid) throws Exception {
+	public void transaction_rent(int cid, int mid2) throws Exception {
 	    /* rent the movie mid to the customer cid */
 	    /* remember to enforce consistency ! */
+
 		
-		/********************* Testing Concurrency Codes**************/
-//		Scanner input = new Scanner(System.in);
-//		System.out.println("Please insert mid:");
-//		int mid = input.nextInt();
+		//Check if the give mid is valid
+		/********************* Testing COdes**************/
+		Scanner input = new Scanner(System.in);
+		System.out.println("Please insert mid:");
+		int mid = input.nextInt();
 		
 		/**********************************************/
 		
-		//Check if the give mid is valid
 		boolean valid = isValidMovie(mid);
 		if (valid) {
 			rentalStatusStatement.clearParameters();
@@ -403,7 +404,7 @@ public class Query {
 		String mov_dirSql = "SELECT DISTINCT m.id, d.lname, d.fname from movie m, directors d, movie_directors md WHERE"
 										+" m.name LIKE '%"+ movie_title +"%' AND m.id = md.mid and md.did = d.id ORDER BY m.id";
 		String mov_actSql = "SELECT DISTINCT m.id, a.lname, a.fname from movie m, actor a, casts c WHERE m.name LIKE '%"+ movie_title 
-								+"%' AND m.id = c.mid and c.pid = a.id ORDER BY m.id, a.lname";
+								+"%' AND m.id = c.mid and c.pid = a.id ORDER BY m.id";
 		
 		Statement movieStatement = conn.createStatement();		
 		Statement mov_dirStatement = conn.createStatement();
@@ -422,11 +423,11 @@ public class Query {
 			
 			if(cdmid <= cmid) {
 				if(cdmid == cmid)
-					System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+" "+ mov_dir_set.getString(3)); //get d.fname and d.lname
+					System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+"  "+ mov_dir_set.getString(3)); //get d.fname and d.lname
 				while (mov_dir_set.next()) {
 					cdmid = mov_dir_set.getInt(1);
 					if (cdmid == cmid)
-						System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+" "+ mov_dir_set.getString(3)); //get d.fname and d.lname
+						System.out.println("\t\tDirector: "+ mov_dir_set.getString(2)+"  "+ mov_dir_set.getString(3)); //get d.fname and d.lname
 					if (cdmid > cmid)
 						break;
 				} 
