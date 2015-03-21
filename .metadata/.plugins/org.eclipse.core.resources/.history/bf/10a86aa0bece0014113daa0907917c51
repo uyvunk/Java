@@ -1,0 +1,18 @@
+import java.net.*;
+import java.io.*;
+
+public class URLReader {
+
+	public static void main(String[] args) throws IOException {
+		URL oracle = new URL("https://play.google.com/store/apps/details?id=com.facebook.katana&hl=en");
+        BufferedReader in = new BufferedReader(
+        new InputStreamReader(oracle.openStream()));
+
+        String inputLine;
+        String htmlContent="";
+        while ((inputLine = in.readLine()) != null)
+            htmlContent+=inputLine;
+        in.close();
+	}
+
+}

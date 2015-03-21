@@ -1,3 +1,6 @@
+//VU NGUYEN
+//CSE 344 HW 7
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -165,9 +168,15 @@ public class Query {
 		remainingRentalStatement.setInt(1, cid);
 		remainingRentalStatement.setInt(2, cid);
 		ResultSet remainingRental_set = remainingRentalStatement.executeQuery();
-		if (remainingRental_set.next())
-			return remainingRental_set.getInt(1);	//return the remaining retal of the current customer
-		return (-1);								// return -1 if the ResultSet is empty
+		if (remainingRental_set.next()) {
+			int remainRental = remainingRental_set.getInt(1);
+			remainingRental_set.close();
+			return remainRental;	//return the remaining retal of the current customer
+		} else {
+			remainingRental_set.close();
+			return (-1);								// return -1 if the ResultSet is empty
+		}
+		
 	}
 
 	public String getCustomerName(int cid) throws Exception {
@@ -175,9 +184,16 @@ public class Query {
 		userNameStatement.clearParameters();
 		userNameStatement.setInt(1, cid);
 		ResultSet userName_set = userNameStatement.executeQuery();
-		if (userName_set.next())
-			return userName_set.getString(1)+" "+userName_set.getString(2);	// returning fname lname of the current user
-		return null;														// return null if the ResultSet is empty
+		if (userName_set.next()) {
+			String fname = userName_set.getString(1);
+			String lname = userName_set.getString(2);
+			userName_set.close();
+			return fname +" "+ lname;	// returning fname lname of the current user
+		} else {
+			userName_set.close();
+			return null;
+		}
+																// return null if the ResultSet is empty
 
 	}
 
@@ -186,9 +202,13 @@ public class Query {
 		validPlanStatement.clearParameters();
 		validPlanStatement.setInt(1, planid);
 		ResultSet validPlan_set = validPlanStatement.executeQuery();
-		if (validPlan_set.next() && validPlan_set.getInt(1)==1)
+		if (validPlan_set.next() && validPlan_set.getInt(1)==1) {
+			validPlan_set.close();
 			return true;
-		return false;
+		} else {
+			validPlan_set.close();
+			return false;
+		}
 	}
 
 	public boolean isValidMovie(int mid) throws Exception {
@@ -196,9 +216,13 @@ public class Query {
 		validMovieStatement.clearParameters();
 		validMovieStatement.setInt(1, mid);
 		ResultSet validMovie_set = validMovieStatement.executeQuery();
-		if (validMovie_set.next() && validMovie_set.getInt(1)==1)
+		if (validMovie_set.next() && validMovie_set.getInt(1)==1) {
+			validMovie_set.close();
 			return true;
-		return false;
+		} else {
+			validMovie_set.close();
+			return false;
+		}
 	}
 //
 //	private int getRenterID(int mid) throws Exception {
@@ -301,6 +325,7 @@ public class Query {
 		customerConn.setAutoCommit(false);
 		Statement choosePlanStatement = customerConn.createStatement();
 		int rowAffected = choosePlanStatement.executeUpdate(updateSql);	//update plan_id from customer table
+		customerConn.setAutoCommit(true);
 		if (rowAffected == 1) {
 			customerConn.commit();
 			System.out.println("Plan has been updated");
@@ -308,7 +333,7 @@ public class Query {
 			customerConn.rollback();
 			System.out.println("Plan updated UNSUCESSFULLY. Please try again later");
 		}
-		customerConn.setAutoCommit(true);
+		
 	}
 
 	public void transaction_listPlans() throws Exception {
@@ -320,22 +345,24 @@ public class Query {
 		while (listPlan_set.next()){
 			System.out.println("\t" + listPlan_set.getInt(1) + "\t"+ listPlan_set.getString(2) + "\t\t\t" + listPlan_set.getInt(3) + "\t\t\t" + listPlan_set.getInt(4));
 		}
+		listPlan_set.close();
 	}
 
-	public void transaction_rent(int cid, int mid2) throws Exception {
+	public void transaction_rent(int cid, int mid) throws Exception {
 	    /* rent the movie mid to the customer cid */
 	    /* remember to enforce consistency ! */
 		
 		/********************* Testing Concurrency Codes**************/
-		Scanner input = new Scanner(System.in);
-		System.out.println("Please insert mid:");
-		int mid = input.nextInt();
+//		Scanner input = new Scanner(System.in);
+//		System.out.println("Please insert mid:");
+//		int mid = input.nextInt();
 		
 		/**********************************************/
 		
 		//Check if the give mid is valid
 		boolean valid = isValidMovie(mid);
 		if (valid) {
+			customerConn.setAutoCommit(false);
 			rentalStatusStatement.clearParameters();
 			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
 			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
@@ -345,10 +372,10 @@ public class Query {
 					System.out.println("\t\tRental Status: YOU'RE HOLDING IT");
 				else
 					System.out.println("\t\tRental Status: UNAVAILABLE");
+				customerConn.setAutoCommit(true);
 			} else {
 					int remainRental = getRemainingRentals(cid);
 					if (remainRental > 0)	{
-							customerConn.setAutoCommit(false);
 							String date = getDate();
 							String rentingSql = "INSERT INTO Rental VALUES (" + cid + "," + mid + ",'open'," + date + ")";
 							Statement rentingStatement = customerConn.createStatement();
@@ -360,26 +387,27 @@ public class Query {
 								customerConn.rollback();
 								System.out.println("\t\tRental Status: UNSUCCESSFUL. Please try another time.");
 							}
-							customerConn.setAutoCommit(true);
-						
 					}
-					
+					customerConn.setAutoCommit(true);	
 			} 
+		rentalStatus_set.close();
 		} else {
 			System.out.println("Invalid Movie ID. Please try again");
 		}
+		
 	}
 
 	public void transaction_return(int cid, int mid) throws Exception {
 	    /* return the movie mid by the customer cid */
 		boolean valid = isValidMovie(mid);
 		if (valid) {
+			customerConn.setAutoCommit(false);
 			rentalStatusStatement.clearParameters();
 			rentalStatusStatement.setInt(1, mid); 	//plug mid to the query the status of the movie
 			ResultSet rentalStatus_set = rentalStatusStatement.executeQuery();
 			if (rentalStatus_set.next() && rentalStatus_set.getInt(1) == cid) {
-					String returningSql = "UPDATE Rental SET status = 'close' WHERE customer_id = " + cid + " AND movie_id = " + mid;
-					customerConn.setAutoCommit(false);
+					String returningSql = "UPDATE Rental SET status = 'close' WHERE customer_id = " + cid + " AND movie_id = " + mid 
+										+ " AND status = 'open'";
 					Statement returningStatement = customerConn.createStatement();
 					int rowAffected = returningStatement.executeUpdate(returningSql);
 					if (rowAffected == 1) {
@@ -393,7 +421,7 @@ public class Query {
 			} else {
 					System.out.println("\t\tReturn Status: YOU'RE NOT RENTING THIS MOVIE");
 			}						
-
+		rentalStatus_set.close();
 		} else {
 			System.out.println("Invalid Movie ID. Please try again");
 		}
@@ -451,14 +479,6 @@ public class Query {
 						break;
 				} 
 			}
-			
-//			while (mov_act_set.next()) {
-//				camid = mov_act_set.getInt(1);
-//				if (camid == cmid)
-//					System.out.println("\t\tActor: "+ mov_act_set.getString(2)+"  "+ mov_act_set.getString(3)); //get d.fname and d.lname
-//				else
-//					break;
-//			} 
 	
 		}
 		mov_set.close();

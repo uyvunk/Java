@@ -1,0 +1,33 @@
+import java.net.*;
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class URLReader {
+
+	public static void main(String[] args) throws IOException {
+		URL oracle = new URL("https://play.google.com/store/apps/details?id=com.facebook.katana&hl=en");
+        BufferedReader in = new BufferedReader(
+        new InputStreamReader(oracle.openStream()));
+        
+     // create both the string pattern and a split pattern
+    	String pattern = ".*src=\"(.*)\" itemprop=\"screenshot\">";
+    	String splitP = "img class=\"screenshot\"";
+    //create pattern objects
+    	Pattern regexp = Pattern.compile(pattern);
+    	Matcher matcher = regexp.matcher("");
+    	Pattern splitPat = Pattern.compile(splitP);
+    //Create array for the screenshots urls
+    	List<String> list_url = new ArrayList<String>();
+
+        String inputLine;
+        String htmlContent="";
+        while ((inputLine = in.readLine()) != null)
+            htmlContent+=inputLine;
+        in.close();
+        //System.out.println(htmlContent);
+        
+        
+	}
+
+}
