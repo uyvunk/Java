@@ -1,0 +1,20 @@
+import com.mongodb.DBObject;
+
+
+public class Score {      
+	     public double count;      
+	     public double fiveStars;  
+	     public double fourStars;  
+	     public double threeStars; 
+	     public double twoStars;  
+	     public double oneStars;
+	     
+	     public Score(DBObject t) {
+	    	 this.count = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());
+	    	 this.fiveStars = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());
+	    	 this.fourStars = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());
+	    	 this.threeStars = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());
+	    	 this.twoStars = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());
+	    	 this.oneStars = Double.parseDouble(((DBObject)t.get("Score")).get("Count").toString());	    	 
+	     }
+}

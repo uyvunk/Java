@@ -1,0 +1,79 @@
+import com.mongodb.DBObject;
+
+
+public class appNode {
+     public String	referenceDate;        
+     public String	url;                  
+     public String	name;                   
+     public String	developer;              
+     public String	isTopDeveloper;         
+     public String 	developerURL;           
+     public String 	publicationDate;        
+     public String	category;               
+     public String	isFree;                 
+     public String	price;                  
+     public String	reviewers;              
+     public String	coverImgUrl;           
+     public String	description;            
+     public Score	score;                  
+     public String	lastUpdateDate;         
+     public String	appSize;                
+     public String	instalations;           
+     public String	currentVersion;         
+     public String	minimumOSVersion;       
+     public String	contentRating;          
+     public String	haveInAppPurchases;     
+     public String	developerEmail;         
+     public String	developerWebsite;       
+     public String	developerPrivacyPolicy; 
+     public String	physicalAddress;   
+     
+     // Contruct an appNode which contain all the info that is available from the DB
+     public appNode(DBObject t) {
+		this.url = t.get("Url").toString(); // getting app's page url
+		this.name = t.get("Name").toString(); // assigning Name to appName
+		this.developer = t.get("Developer").toString();
+		this.isTopDeveloper = t.get("IsTopDeveloper").toString();
+		this.developerURL = t.get("DeveloperURL").toString();
+		this.publicationDate = t.get("PublicationDate").toString();
+		this.category = t.get("Category").toString();
+		this.isFree = t.get("IsFree").toString();
+		this.price = t.get("Price").toString();
+		this.reviewers = t.get("Reviewers").toString();
+		this.coverImgUrl = t.get("CoverImgUrl").toString();
+		this.description = t.get("Description").toString();
+		this.score = new Score(t);
+		this.lastUpdateDate = t.get("LastUpdate").toString();
+		this.appSize = t.get("AppSize").toString();
+		this.instalations = t.get("Instalations").toString();
+		this.currentVersion = t.get("CurrentVersion").toString();
+		this.minimumOSVersion = t.get("MinimumOSVersion").toString();
+		this.contentRating = t.get("ContentRating").toString();
+		this.haveInAppPurchases = t.get("HaveInAppPurchases").toString();
+		this.developerEmail = t.get("DeveloperEmail").toString();
+		this.developerWebsite = t.get("DeveloperWebsite").toString();
+		this.developerPrivacyPolicy = t.get("DeveloperPrivacyPolicy").toString();
+		this.physicalAddress = t.get("PhysicalAddress").toString();
+     }
+     
+     public String toString() {
+    	 String result =	"Name:" + this.name + "\n" +
+    			 			"URL: " + this.url + "\n" +
+    			 			"Developer: " + this.developer + "\n" +
+    			 			"Is Top Developer: " + this.isTopDeveloper + "\n" +
+    			 			"Developer URL: " + this.developerURL + "\n" +
+    			 			"ReferenceDate: " + this.referenceDate + "\n" +
+    			 			"Publication Date: " + this.publicationDate + "\n" +
+    			 			"Category: " + this.category + "\n" +
+    			 			"Is Free?: " + this.isFree + "\n" +
+    			 			"Price (USD): $" + this.price + "\n" +
+    			 			"Number of Reviewers: " + this.reviewers + "\n" +
+    			 			"Cover IMG url: " + this.coverImgUrl + "\n" + 
+    			 			"Desciption: " + this.description + "\n" +
+    			 			"Score: " + this.score.toString() + "\n" +
+    			 			;
+    	 
+    	 return result;
+     }
+}
+

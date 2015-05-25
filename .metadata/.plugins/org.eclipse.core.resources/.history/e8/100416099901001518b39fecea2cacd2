@@ -1,0 +1,30 @@
+
+public class appNode {
+     public String ReferenceDate;        
+     public String   Url;                  
+     public String   Name;                   
+     public String   Developer;              
+     public boolean     IsTopDeveloper;         
+     public String   DeveloperURL;           
+     public String PublicationDate;        
+     public String   Category;               
+     public boolean     IsFree;                 
+     public double   Price;                  
+     public double   Reviewers;              
+     public String   CoverImgUrl;            
+     public String   Screenshot;             
+     public String   Description;            
+     public Score    Score;                  
+     public String LastUpdateDate;         
+     public Double   AppSize;                
+     public String   Instalations;           
+     public String   CurrentVersion;         
+     public String   MinimumOSVersion;       
+     public String   ContentRating;          
+     public boolean     HaveInAppPurchases;     
+     public String   DeveloperEmail;         
+     public String   DeveloperWebsite;       
+     public String   DeveloperPrivacyPolicy; 
+     public String   PhysicalAddress;         
+}
+

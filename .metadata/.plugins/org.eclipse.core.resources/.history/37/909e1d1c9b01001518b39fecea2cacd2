@@ -1,0 +1,38 @@
+import com.mongodb.DBObject;
+
+
+public class appNode {
+     public String	referenceDate;        
+     public String	url;                  
+     public String	name;                   
+     public String	developer;              
+     public boolean	isTopDeveloper;         
+     public String 	developerURL;           
+     public String 	publicationDate;        
+     public String	category;               
+     public boolean	isFree;                 
+     public double	price;                  
+     public double	reviewers;              
+     public String	coverImgUrl;            
+     public String	screenshot;             
+     public String	description;            
+     public Score	score;                  
+     public String	lastUpdateDate;         
+     public Double	appSize;                
+     public String	instalations;           
+     public String	currentVersion;         
+     public String	minimumOSVersion;       
+     public String	contentRating;          
+     public boolean	haveInAppPurchases;     
+     public String	developerEmail;         
+     public String	developerWebsite;       
+     public String	developerPrivacyPolicy; 
+     public String	physicalAddress;   
+     
+     // Contruct an appNode which contain all the info that is available from the DB
+     public appNode(DBObject tuple) {
+		this.Url = tuple.get("Url").toString(); // getting app's page url
+		this. = tuple.get("Name").toString(); // assigning Name to appName
+     }
+}
+

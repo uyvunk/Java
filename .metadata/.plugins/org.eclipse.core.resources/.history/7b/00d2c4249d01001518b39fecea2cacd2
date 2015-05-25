@@ -1,0 +1,49 @@
+import com.mongodb.DBObject;
+import org.bson.BasicBSONObject;
+
+public class appNode {
+     public String	referenceDate;        
+     public String	url;                  
+     public String	name;                   
+     public String	developer;              
+     public boolean	isTopDeveloper;         
+     public String 	developerURL;           
+     public String 	publicationDate;        
+     public String	category;               
+     public boolean	isFree;                 
+     public double	price;                  
+     public double	reviewers;              
+     public String	coverImgUrl;           
+     public String	description;            
+     public Score	score;                  
+     public String	lastUpdateDate;         
+     public Double	appSize;                
+     public String	instalations;           
+     public String	currentVersion;         
+     public String	minimumOSVersion;       
+     public String	contentRating;          
+     public boolean	haveInAppPurchases;     
+     public String	developerEmail;         
+     public String	developerWebsite;       
+     public String	developerPrivacyPolicy; 
+     public String	physicalAddress;   
+     
+     // Contruct an appNode which contain all the info that is available from the DB
+     public appNode(DBObject t) {
+		this.url = t.get("Url").toString(); // getting app's page url
+		this.name = t.get("Name").toString(); // assigning Name to appName
+		this.developer = t.get("Developer").toString();
+		this.isTopDeveloper = (BasicBSONObject) t.getBoolean("IsTopDeveloper", false);
+		this.developerURL = t.get("DeveloperURL").toString();
+		this.publicationDate = t.get("PublicationDate").toString();
+		this.category = t.get("Category").toString();
+		this.isFree = (t.get("IsFree").toString().equals("true"))?true:false;
+		this.price = Double.parseDouble(t.get("Price").toString());
+		this.reviewers = Double.parseDouble(t.get("Reviewers").toString());
+		this.coverImgUrl = t.get("CoverImgUrl").toString();
+		this.description = t.get("Description").toString();
+		this.score = new Score(t);
+		
+     }
+}
+

@@ -2,22 +2,26 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="name" key="selection"/>
+		<item value=".toString()" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="name"/>
-			<item value="cover"/>
-			<item value="appUrl"/>
-			<item value="plan"/>
-			<item value="rent"/>
-			<item value="isValidMovie"/>
-			<item value="movieStatement"/>
-			<item value="movie_set"/>
+			<item value=".toString()"/>
+			<item value="t.get("/>
+			<item value="appnodeAp"/>
+			<item value="appnode"/>
+			<item value="bool"/>
+			<item value="DateTime"/>
+			<item value="{get;set;}"/>
+			<item value="string"/>
 		</list>
 		<list key="replacehistory">
+			<item value=""/>
+			<item value="getElStrVal(t, "/>
+			<item value="boolean"/>
+			<item value="String"/>
 			<item value="scrSh_url"/>
 			<item value="mov_set"/>
 		</list>
@@ -26,7 +30,7 @@
 		<item value="237" key="DIALOG_WIDTH"/>
 		<item value="1|Tahoma|8.25|0|WINDOWS|1|-11|0|0|0|400|0|0|0|1|0|0|0|0|Tahoma" key="DIALOG_FONT_NAME"/>
 		<item value="357" key="DIALOG_HEIGHT"/>
-		<item value="686" key="DIALOG_X_ORIGIN"/>
-		<item value="194" key="DIALOG_Y_ORIGIN"/>
+		<item value="1069" key="DIALOG_X_ORIGIN"/>
+		<item value="226" key="DIALOG_Y_ORIGIN"/>
 	</section>
 </section>

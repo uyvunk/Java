@@ -1,0 +1,16 @@
+import com.mongodb.DBObject;
+
+
+public class Score {
+		 public double total;      
+	     public double count;      
+	     public double fiveStars;  
+	     public double fourStars;  
+	     public double threeStars; 
+	     public double twoStars;  
+	     public double oneStars;
+	     
+	     public Score(DBObject t) {
+	    	 this.total = Double.parseDouble(t.get("Score").get("Total").toString());
+	     }
+}
