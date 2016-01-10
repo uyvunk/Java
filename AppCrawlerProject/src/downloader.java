@@ -34,7 +34,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class downloader {
 	private static String ROOT_DIR = ":\\sampleScreenShots\\";
-	private static String COLLECTION_NAME = "ProcessedApps_2015", DB_NAME="admin",DB_USER_NAME="siteUserAdmin";
+	private static String COLLECTION_NAME = "ProcessedApps_2016", DB_NAME="admin",DB_USER_NAME="siteUserAdmin";
 	private static char[] DB_PASSWRD = {'p','a','s','s','w','o','r','d'};
 	private static MongoClient mongoClient;
 	
@@ -107,9 +107,9 @@ public class downloader {
 						if (screenshot_url_list != null) {
 							int a = 0;
 							for (String each_screenshot : screenshot_url_list){
-								URL scrSh_url = new URL(each_screenshot); 
-								File photo = new File(path+"\\screenShot" + a + ".webp");
 								try {
+									URL scrSh_url = new URL(formatURL(each_screenshot)); 
+									File photo = new File(path+"\\screenShot" + a + ".webp");
 									FileUtils.copyURLToFile(scrSh_url, photo)	;
 									a++;
 								} catch (Exception e) {
@@ -200,6 +200,12 @@ public class downloader {
 			result = result.replace(special[i], '_');
 		}
 		return result;
+	}
+	
+	private static String formatURL(String input) {
+		if(input.startsWith("//"))
+			return "http:" + input;
+		return input;
 	}
 
 }
